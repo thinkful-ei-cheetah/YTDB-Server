@@ -20,6 +20,14 @@ create your testdb: create db -U <username> <database>
 
 ```
 
+## Routes
+
+/api/registger
+/api/reviews
+/api/channels
+/api/dashboard
+/api/user
+
 ## Scripts
 
 Start the application:
