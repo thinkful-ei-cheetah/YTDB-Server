@@ -7,7 +7,7 @@ const helmet = require('helmet');
 const { NODE_ENV } = require('./config');
 const registerRouter = require('./register/registerRouter');
 const reviewsRouter = require('./reviews/reviewsRouter');
-const channelsRouter = require('./channels/channelsRouter');
+const channelRouter = require('./channels/channelRouter');
 const dashboardRouter = require('./dashboard/dashboardRouter');
 const userRouter = require('./user/userRouter');
 
@@ -34,9 +34,9 @@ app.get('/', (req, res) => {
   res.send('Hello, world!');
 });
 
-app.use('/api/registger', registerRouter);
+app.use('/api/register', registerRouter);
 app.use('/api/reviews', reviewsRouter);
-app.use('/api/channels', channelsRouter);
+app.use('/api/channels', channelRouter);
 app.use('/api/dashboard', dashboardRouter);
 app.use('/api/user', userRouter);
 
