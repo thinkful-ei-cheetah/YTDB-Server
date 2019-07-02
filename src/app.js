@@ -10,7 +10,7 @@ const app = express();
 
 const morganOption = NODE_ENV === 'production' ? 'tiny' : 'common';
 
-const whitelist = ['http://localhost:3000', 'http://my-project.com'];
+const whitelist = ['http://localhost:3000'];
 const options = {
   origin: function(origin, callback) {
     if (whitelist.indexOf(origin) !== -1 || !origin) {
