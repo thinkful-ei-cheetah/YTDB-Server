@@ -15,8 +15,8 @@ git clone https://github.com/thinkful-ei-cheetah/YTDB-Server.git
 npm install
 mv example.env .env
 Setup your credential in your enviroment file
-create your db: create db -U <username> <database>
-create your testdb: create db -U <username> <database>
+create your db: create db -U <username> ytdb
+create your testdb: create db -U <username> ytdb-test
 
 ```
 
