@@ -5,6 +5,11 @@ const morgan = require('morgan');
 const cors = require('cors');
 const helmet = require('helmet');
 const { NODE_ENV } = require('./config');
+const registerRouter = require('./register/registerRouter');
+const reviewsRouter = require('./reviews/reviewsRouter');
+const channelRouter = require('./channels/channelRouter');
+const dashboardRouter = require('./dashboard/dashboardRouter');
+const userRouter = require('./user/userRouter');
 
 const app = express();
 
@@ -28,6 +33,12 @@ app.use(helmet());
 app.get('/', (req, res) => {
   res.send('Hello, world!');
 });
+
+app.use('/api/register', registerRouter);
+app.use('/api/reviews', reviewsRouter);
+app.use('/api/channels', channelRouter);
+app.use('/api/dashboard', dashboardRouter);
+app.use('/api/user', userRouter);
 
 app.use(function errorHandler(error, req, res, next) {
   let response;

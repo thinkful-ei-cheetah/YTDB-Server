@@ -1,26 +1,61 @@
-# Express Boilerplate!
+# YouTube Database API
 
-This is a boilerplate project used for starting new projects!
+IMDB for youtube channels. Rate and review your favorites.
+
+## Download
+
+```
+Fork repo or
+git clone https://github.com/thinkful-ei-cheetah/YTDB-Server.git
+```
 
 ## Set up
 
-Complete the following steps to start a new project (NEW-PROJECT-NAME):
+```
+npm install
+mv example.env .env
+Setup your credential in your enviroment file
+create your db: create db -U <username> ytdb
+create your testdb: create db -U <username> ytdb-test
 
-1. Clone this repository to your local machine `git clone BOILERPLATE-URL NEW-PROJECTS-NAME`
-2. `cd` into the cloned repository
-3. Make a fresh start of the git history for this project with `rm -rf .git && git init`
-4. Install the node dependencies `npm install`
-5. Move the example Environment file to `.env` that will be ignored by git and read by the express server `mv example.env .env`
-6. Edit the contents of the `package.json` to use NEW-PROJECT-NAME instead of `"name": "express-boilerplate",`
+```
+
+## Routes
+
+/api/registger
+/api/reviews
+/api/channels
+/api/dashboard
+/api/user
 
 ## Scripts
 
-Start the application `npm start`
+Start the application:
 
-Start nodemon for the application `npm run dev`
+```
+ npm start
+```
 
-Run the tests `npm test`
+Start nodemon for the application:
 
-## Deploying
+```
+ npm run dev
+```
 
-When your new project is ready for deployment, add a new Heroku application with `heroku create`. This will make a new git remote called "heroku" and you can then `npm run deploy` which will push to this remote's master branch.
+Run the test:
+
+```
+npm test
+```
+
+Run the migrations up:
+
+```
+npm run migrate
+```
+
+Run the migrations down
+
+```
+npm run migrate -- 0
+```
