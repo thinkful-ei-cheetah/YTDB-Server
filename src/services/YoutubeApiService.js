@@ -4,7 +4,7 @@ const { YT_API_KEY } = require('../config');
 
 const baseURL = 'https://www.googleapis.com/youtube/v3';
 
-const ChannelApiService = {
+const YoutubeApiService = {
   SearchChannels(searchterm) {
     return fetch(
       `${baseURL}/search?part=snippet&maxResults=20&order=relevance&q=${searchterm}&type=channel&key=${YT_API_KEY}`
@@ -24,4 +24,4 @@ const ChannelApiService = {
   }
 };
 
-module.exports = ChannelApiService;
+module.exports = YoutubeApiService;
