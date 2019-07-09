@@ -10,6 +10,7 @@ const reviewsRouter = require('./reviews/reviewsRouter');
 const channelRouter = require('./channels/channelRouter');
 const dashboardRouter = require('./dashboard/dashboardRouter');
 const userRouter = require('./user/userRouter');
+const channelRatingRouter = require('./channelrating/channelRatingRouter');
 
 const app = express();
 
@@ -39,6 +40,7 @@ app.use('/api/reviews', reviewsRouter);
 app.use('/api/channels', channelRouter);
 app.use('/api/dashboard', dashboardRouter);
 app.use('/api/user', userRouter);
+app.use('/api/rating', channelRatingRouter);
 
 app.use(function errorHandler(error, req, res, next) {
   let response;
