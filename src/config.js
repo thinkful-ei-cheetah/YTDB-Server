@@ -5,5 +5,6 @@ module.exports = {
   NODE_ENV: process.env.NODE_ENV || 'development',
   DB_URL: process.env.DB_URL,
   DATABASE_URL: process.env.DATABASE_URL,
-  YT_API_KEY: process.env.YT_API_KEY
+  YT_API_KEY: process.env.YT_API_KEY,
+  JWT_SECRET: process.env.JWT_SECRET
 };
