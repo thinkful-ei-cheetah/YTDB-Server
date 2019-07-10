@@ -5,7 +5,7 @@ const jsonBodyParser = express.json();
 const path = require('path');
 const RegisterService = require('./register-service');
 
-RegisterRouter.post('/', jsonBodyParser, (req, res, next) => {
+RegisterRouter.post('/', jsonBodyParser, async (req, res, next) => {
   let { name, username, password } = req.body;
 
   for (const field of ['name', 'username', 'password']) {
@@ -16,13 +16,13 @@ RegisterRouter.post('/', jsonBodyParser, (req, res, next) => {
   }
 
   try {
-    const passwordError = RegisterService.validatePassword(password);
+    // const passwordError = RegisterService.validatePassword(password);
 
-    if (passwordError) {
-      return res.status(400).json({ error: passwordError });
-    }
+    // if (passwordError) {
+    //   return res.status(400).json({ error: passwordError });
+    // }
 
-    const hasUserWithUserName = RegisterService.hasUserWithUserName(
+    const hasUserWithUserName = await RegisterService.hasUserWithUserName(
       req.app.get('db'),
       username
     );
@@ -30,7 +30,7 @@ RegisterRouter.post('/', jsonBodyParser, (req, res, next) => {
     if (hasUserWithUserName)
       return res.status(400).json({ error: `Username already taken` });
 
-    const hashedPassword = RegisterService.hashPassword(password);
+    const hashedPassword = await RegisterService.hashPassword(password);
 
     const newUser = {
       username,
@@ -38,7 +38,7 @@ RegisterRouter.post('/', jsonBodyParser, (req, res, next) => {
       name
     };
 
-    const user = RegisterService.saveUser(req.app.get('db'), newUser);
+    const user = await RegisterService.saveUser(req.app.get('db'), newUser);
 
     res
       .status(201)

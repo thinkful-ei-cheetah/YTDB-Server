@@ -4,12 +4,23 @@ const REGEX_UPPER_LOWER_NUMBER_SPECIAL = /(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*
 const bcrypt = require('bcryptjs');
 
 const RegisterService = {
-  hasUserWithUserName(db, username) {
-    return false;
+  hasUserWithUserName(knex, username) {
+    return knex('user')
+      .where({ username: username })
+      .first()
+      .then(user => !!user);
   },
 
-  saveUser(db, newUser) {
-    return newUser.username;
+  saveUser(knex, newUser) {
+    return knex('user')
+      .insert({
+        username: newUser.username,
+        password: newUser.password,
+        name: newUser.name
+      })
+      .into('user')
+      .returning('*')
+      .then(([user]) => user);
   },
 
   validatePassword(password) {
