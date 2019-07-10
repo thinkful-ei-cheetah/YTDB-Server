@@ -11,37 +11,31 @@ ChannelRouter.route('/search').get(jsonBodyParser, async (req, res, next) => {
   try{
     let { search_term, ytapi } = req.body;
     search_term = xss(search_term).toLowerCase()
-    console.log(search_term, ytapi)
     if(ytapi){
       let results = await YoutubeApiService.SearchChannels(search_term)
-      // const results = await Promise.all(your_promises)
-      // const filtered_results = results.filter(res => {})
-      // let newChannels = results.items.filter(channel => {
-      //   // console.log(channel.snippet.channelTitle)
-      //   let temp = ChannelService.channelExisty(
-      //     req.app.get('db'),
-      //     channel.snippet.channelId
-      //   )
-      //   console.log(temp)
-      //   return temp
-      // })
-      // console.log('newChannels', newChannels.length)
       await ChannelService.insertOrUpdateChannels(
         req.app.get('db'),
         results.items
       )
-      res.status(200).json({ data: results.items })
-      // YoutubeApiService.SearchChannels(search_term)
-      // .then(response => {
-      //   // console.log(response.items[0])
-      //   return response.items.map(channel => {
-      //     return channel
-      //   })
-      // })
-      // .then(response => {
-      //   res.status(200).json({ data: response });
-      // })
-      // .catch(error => next(error));
+      if(!results.length){
+        res.status(204)
+      }
+      let resultsYtIds = results.items.map(channel => {
+        return channel.id.channelId
+      })
+      await ChannelService.updateKeywords(
+        req.app.get('db'),
+        search_term
+      )
+      await ChannelService.insertOrUpdateChannelKeywords(
+        req.app.get('db'),
+        search_term,
+        resultsYtIds
+      )
+      results = results.items.map(channel => {
+        return ChannelService.serializeChannel(channel)
+      })
+      res.status(200).json({ data: results })
     }
     else{
       ChannelService.searchChannels(

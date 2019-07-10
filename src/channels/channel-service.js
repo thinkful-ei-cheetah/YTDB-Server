@@ -26,69 +26,78 @@ const ChannelService = {
   },
   insertOrUpdateChannels(db, arr){
     return db.transaction( trx => {
+      // let date = new Date()
       const queries = arr.map(channel => {
         let data = {
           yt_id: channel.id.channelId,
           title: channel.snippet.channelTitle,
           thumbnail: channel.snippet.thumbnails.default.url,
-          descritption: channel.snippet.descritption,
-          'date_updated': Date.now()
+          description: channel.snippet.description
+          // 'date_updated': date
         }
-        // console.log(data)
         const insert = trx('channel').insert(data).toString()
-        const update = trx('channel').update(data).where('yt_id', channel.id.channelId) //.whereRaw(`channel.yt_id = '${channel.id.channelId}'`)
-        // console.log(trx.raw(`${insert} ON DUPLICATE KEY UPDATE ${update}`).transacting(trx).client['Client_PG'])
-        return trx.raw(`${insert} ON CONFLICT ("yt_id") DO UPDATE SET ${update}`).transacting(trx)
-        // return util.format(
-        //   '%s ON DUPLICATE KEY UPDATE %s',
-        //   insert, //.toString(),
-        //   update //.toString().replace(/^update\s.*\sset\s/i, '')
-        // )
+        const update = trx('channel').update(data).where('channel.yt_id', channel.id.channelId).toString().replace(/^update\s.*\sset\s/i, '')
+        return trx.raw(`${insert} ON CONFLICT (yt_id) DO UPDATE SET ${update}`) //.transacting(trx)
       })
-      // console.log(queries)
       return Promise.all(queries).then(trx.commit).catch(trx.rollback)
     })
   },
-//   const createUser = async ({ email, name }) => {
-//   const insert = knex('users').insert({ email, name }).toString()
-
-//   const update = knex('users')
-//     .update({ name })
-//     .whereRaw(`users.email = '${email}'`)
-//   const query = util.format(
-//     '%s ON CONFLICT (email) DO UPDATE SET %s',
-//     insert.toString(),
-//     update.toString().replace(/^update\s.*\sset\s/i, '')
-//   )
-
-//   await db.raw(query)
-// }
-  // insertOrUpdate(tableName, rows){
-
-  //   return DB.transaction((trx) => {
-
-  //       const queries = rows.map((tuple) => {
-
-  //           const insert = trx(tableName).insert(tuple).toString()
-  //           const update = trx(tableName).update(tuple).toString().replace(/^update(.*?)set\s/gi, '')
-
-  //           return trx.raw(`${insert} ON DUPLICATE KEY UPDATE ${update}`).transacting(trx)
-  //       })
-
-  //       return Promise.all(queries).then(trx.commit).catch(trx.rollback)
-  //   })
-  // }
-  // insertOrUpdateChannel(db, arr){
-  //   return db
-  //     .transaction((trx) => {
-  //       const queries = arr.map(channel => {
-  //         const insert = trx('channel').insert(content)
-  //         const update = trx('channel').where(channel).update(content)
-  //         return trx.raw(`${insert} ON DUPLICATE KEY UPDATE ${update}`).transacting(trx)
-  //       })
-  //       return Promise.all(queries).then(trx.commit).catch(trx.rollback)
-  //     })
-  // }
+  updateKeywords(db, searchTerm){
+    return db.transaction(async trx => {
+      let existy = await trx('keyword')
+        .where('title', searchTerm)
+        .select('title')
+      if(existy.length){
+      }
+      else{
+        // if it's out of sequence, run this:
+        // SELECT pg_catalog.setval(pg_get_serial_sequence('keyword', 'id'), MAX(id)) FROM keyword;
+        await trx('keyword')
+          .insert({ title: searchTerm })
+      }
+    })
+  },
+  insertOrUpdateChannelKeywords(db, searchTerm, channels){
+    return db.transaction(async trx => {
+      let existy = await trx('channel')
+        .select('channel.yt_id', 'channel.title AS channel_title', 'channel_keyword.channel_id', 'channel_keyword.keyword_id', 'keyword.title')
+        .rightJoin('channel_keyword', 'channel.id', 'channel_keyword.channel_id')
+        .leftJoin('keyword', 'channel_keyword.keyword_id', 'keyword.id')
+        .where('keyword.title', 'ILIKE', searchTerm)
+      let listy = existy.map(channel => {
+        return channel.yt_id
+      })
+      let searchTermId = await trx('keyword').select('id').where('title', 'ILIKE', searchTerm).first()
+      for(let i = 0; i < channels.length; i++){
+        if(!listy.includes(channels[i])){
+          let channelId = await trx('channel')
+            .select('channel.id')
+            .where('channel.yt_id', channels[i])
+            .first()
+          await trx('channel_keyword').insert({channel_id: channelId.id, keyword_id: searchTermId.id})
+        }
+      }
+    })
+  },
+  searchChannels(db, searchTerm){
+    return db
+      .select('c.title', 'c.yt_id', 'c.thumbnail', 'c.description', 'c.rating_total', 'rating_count')
+      .from('channel AS c')
+      .leftJoin('channel_keyword AS ck', 'c.id', 'ck.channel_id')
+      .leftJoin('keyword AS k', 'ck.keyword_id', 'k.id')
+      .where('c.title', 'ILIKE', searchTerm)
+      .orWhere('k.title', 'ILIKE', searchTerm)
+  },
+  serializeChannel(channel){
+    return {
+      title: channel.snippet.channelTitle,
+      "yt_id": channel.id.channelId,
+      thumbnail: channel.snippet.thumbnails.default.url,
+      description: channel.snippet.description,
+      "rating_total": null,
+      "rating_count": null
+    }
+  }
 }
 
 module.exports = ChannelService
