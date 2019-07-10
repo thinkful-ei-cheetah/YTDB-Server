@@ -10,6 +10,20 @@ const ChannelService = {
       .where('c.title', 'ILIKE', searchTerm)
       .orWhere('k.title', 'ILIKE', searchTerm)
   },
+  searchChannelsByTopic(db, searchTerm, topicId){
+    return db
+      .select('c.title', 'c.yt_id', 'c.thumbnail', 'c.description', 'c.rating_total', 'rating_count')
+      .from('channel AS c')
+      .leftJoin('channel_keyword AS ck', 'c.id', 'ck.channel_id')
+      .leftJoin('keyword AS k', 'ck.keyword_id', 'k.id')
+      .leftJoin('channel_topic AS ct', 'c.id', 'ct.channel_id')
+      .leftJoin('topic AS t', 'ct.topic_id', 't.id')
+      // .where('c.title', 'ILIKE', searchTerm)
+      .where({'c.title': searchTerm, 't.titleId': topicId})
+      .orWhere({'k.title': searchTerm, 't.titleId': topicId})
+      // .orWhere('k.title', 'ILIKE', searchTerm)
+      // .whereIn('t.titleId', topicId)
+  },
   channelExisty(db, yt_id){
     return db
       .select('yt_id')
@@ -75,6 +89,28 @@ const ChannelService = {
             .where('channel.yt_id', channels[i])
             .first()
           await trx('channel_keyword').insert({channel_id: channelId.id, keyword_id: searchTermId.id})
+        }
+      }
+    })
+  },
+  insertOrUpdateChannelTopics(db, topicId, channels){
+    return db.transaction(async trx => {
+      let existy = await trx('channel')
+        .select('channel.yt_id', 'channel.title AS channel_title', 'channel_topic.channel_id', 'channel_topic.topic_id', 'topic.title', 'topic.titleId')
+        .rightJoin('channel_topic', 'channel.id', 'channel_topic.channel_id')
+        .leftJoin('topic', 'channel_topic.topic_id', 'topic.id')
+        .where('topic.titleId', 'ILIKE', topicId)
+      let listy = existy.map(channel => {
+        return channel.yt_id
+      })
+      let topicIdId = await trx('topic').select('id').where('titleId', 'ILIKE', topicId).first()
+      for(let i = 0; i < channels.length; i++){
+        if(!listy.includes(channels[i])){
+          let channelId = await trx('channel')
+            .select('channel.id')
+            .where('channel.yt_id', channels[i])
+            .first()
+          await trx('channel_topic').insert({channel_id: channelId.id, topic_id: topicIdId.id})
         }
       }
     })
