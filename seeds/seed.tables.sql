@@ -10,7 +10,8 @@ TRUNCATE
   "review",
   "review_rating",
   "topic",
-  "user";
+  "user"
+  RESTART IDENTITY CASCADE;
 
 INSERT INTO "user" ("id", "username", "name", "password", "type")
 VALUES
@@ -222,4 +223,11 @@ VALUES
   -- 'review_id' INTEGER REFERENCES 'review'(id) ON DELETE CASCADE NOT NULL,
   -- CONSTRAINT review_rating_key PRIMARY KEY ('user_id', 'review_id'),
   -- 'like' BOOL NOT NULL
+
+SELECT pg_catalog.setval(pg_get_serial_sequence('channel', 'id'), MAX(id)) FROM channel;
+SELECT pg_catalog.setval(pg_get_serial_sequence('keyword', 'id'), MAX(id)) FROM keyword;
+SELECT pg_catalog.setval(pg_get_serial_sequence('review', 'id'), MAX(id)) FROM review;
+SELECT pg_catalog.setval(pg_get_serial_sequence('topic', 'id'), MAX(id)) FROM topic;
+-- SELECT pg_catalog.setval(pg_get_serial_sequence('user', 'id'), MAX(id)) FROM user;
+
 COMMIT;

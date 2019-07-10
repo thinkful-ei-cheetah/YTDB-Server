@@ -8,4 +8,5 @@ TRUNCATE
   "review",
   "review_rating",
   "topic",
-  "user";
+  "user"
+  RESTART IDENTITY CASCADE;
