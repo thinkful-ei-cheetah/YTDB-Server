@@ -7,13 +7,13 @@ const baseURL = 'https://www.googleapis.com/youtube/v3';
 const YoutubeApiService = {
   SearchChannels(searchterm) {
     return fetch(
-      `${baseURL}/search?part=snippet&maxResults=20&order=relevance&q=${searchterm}&type=channel&key=${YT_API_KEY}`
+      `${baseURL}/search?part=snippet&maxResults=20&order=relevance&q=${searchterm}&relevanceLanguage=en&type=channel&key=${YT_API_KEY}`
     ).then(res => res.json());
   },
 
   SearchChannelsByTopic(searchterm, topic) {
     return fetch(
-      `${baseURL}/search?part=snippet&maxResults=20&order=relevance&q=${searchterm}&topicId=${topic}&type=channel&key=${YT_API_KEY}`
+      `${baseURL}/search?part=snippet&maxResults=20&order=relevance&q=${searchterm}&relevanceLanguage=en&topicId=${topic}&type=channel&key=${YT_API_KEY}`
     ).then(res => res.json());
   },
 

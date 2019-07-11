@@ -1,5 +1,5 @@
 CREATE TABLE "topic" (
   "id" SERIAL PRIMARY KEY,
   "titleId" TEXT NOT NULL UNIQUE,
-  "title" TEXT NOT NULL UNIQUE
+  "title" VARCHAR NOT NULL UNIQUE
 );

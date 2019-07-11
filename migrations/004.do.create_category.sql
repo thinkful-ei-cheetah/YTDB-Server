@@ -1,4 +1,4 @@
 CREATE TABLE "category" (
   "id" SERIAL PRIMARY KEY,
-  "title" TEXT NOT NULL UNIQUE
+  "title" VARCHAR NOT NULL UNIQUE
 );

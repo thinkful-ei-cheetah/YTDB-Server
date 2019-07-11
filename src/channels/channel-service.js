@@ -1,4 +1,5 @@
 const util = require('util')
+const xss = require('xss')
 
 const ChannelService = {
   searchChannels(db, searchTerm){
@@ -44,14 +45,15 @@ const ChannelService = {
       const queries = arr.map(channel => {
         let data = {
           yt_id: channel.id.channelId,
-          title: channel.snippet.channelTitle,
-          thumbnail: channel.snippet.thumbnails.default.url,
-          description: channel.snippet.description
+          title: xss(channel.snippet.channelTitle),
+          thumbnail: xss(channel.snippet.thumbnails.default.url),
+          description: xss(channel.snippet.description)
           // 'date_updated': date
         }
         const insert = trx('channel').insert(data).toString()
         const update = trx('channel').update(data).where('channel.yt_id', channel.id.channelId).toString().replace(/^update\s.*\sset\s/i, '')
         return trx.raw(`${insert} ON CONFLICT (yt_id) DO UPDATE SET ${update}`) //.transacting(trx)
+        // return trx.raw('%s ON CONFLICT (yt_id) DO UPDATE SET %s', insert, update) 
       })
       return Promise.all(queries).then(trx.commit).catch(trx.rollback)
     })
