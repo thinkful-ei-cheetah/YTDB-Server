@@ -13,6 +13,15 @@ const FavoriteService = {
       .join('channel', 'favorite.channel_id', '=', 'channel.id')
       .select('channel.id', 'channel.title', 'channel.thumbnail')
       .then(favorites => favorites);
+  },
+  deleteFavorites(knex, user_id, channel_id) {
+    return knex('favorite')
+      .where({
+        'favorite.user_id': user_id,
+        'favorite.channel_id': channel_id
+      })
+      .del()
+      .returning('*');
   }
 };
 

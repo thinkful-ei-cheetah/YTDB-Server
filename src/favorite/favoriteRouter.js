@@ -29,6 +29,22 @@ FavoriteRouter.route('/')
         res.status(200).json(favorites);
       })
       .catch(error => next(error));
+  })
+  .delete(jsonBodyParser, (req, res, next) => {
+    const { channelId } = req.body;
+
+    for (const field of ['channelId']) {
+      if (!req.body[field])
+        return res.status(400).json({
+          error: `Missing '${field}' in request body`
+        });
+    }
+
+    FavoriteService.deleteFavorites(req.app.get('db'), req.user.id, channelId)
+      .then(favorites => {
+        res.status(200).json(favorites[0]);
+      })
+      .catch(error => next(error));
   });
 
 module.exports = FavoriteRouter;
