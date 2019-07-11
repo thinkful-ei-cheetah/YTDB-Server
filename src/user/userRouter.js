@@ -40,7 +40,7 @@ UserRouter.post('/', jsonBodyParser, (req, res, next) => {
         const payload = { id: dbUser.id };
         res.status(200).json({
           authToken: UserService.createJwt(sub, payload),
-          name: dbUser.name
+          user: dbUser
         });
       });
     })
