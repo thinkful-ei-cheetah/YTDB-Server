@@ -119,7 +119,18 @@ ChannelRouter.route('/:id').get((req, res, next) => {
     const { id } = req.params;
   
     if(ytapi){
-      // let results = await YoutubeApiService.SearchChannelsById(id)
+       let results = await YoutubeApiService.SearchChannelsById(id);
+       if (results.items.topicDetails.topicIds)
+       {
+        results.items.topicDetails.topicIds.map(topic => {
+          await ChannelService.insertOrUpdateChannelTopics(
+            req.app.get('db'),
+            topic,
+            id
+          )
+        })
+       }
+       // 
     }
     else{
       ChannelService.searchChannelsById(
