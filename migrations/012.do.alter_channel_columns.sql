@@ -3,5 +3,5 @@ ALTER TABLE "channel"
   ADD COLUMN "comment-count" INTEGER,
   ADD COLUMN "view-count" INTEGER,
   ADD COLUMN "subscriber-count" INTEGER,
-  ADD COLUMN "description" TEXT,
+  ADD COLUMN "description" VARCHAR,
   ADD COLUMN "date_updated" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL;
