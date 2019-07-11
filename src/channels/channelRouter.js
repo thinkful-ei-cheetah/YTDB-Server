@@ -115,11 +115,26 @@ ChannelRouter.route('/search/topic').get(jsonBodyParser, async (req, res, next) 
 ChannelRouter.route('/:id').get((req, res, next) => {
   const { id } = req.params;
 
-  YoutubeApiService.ChannelDetails(id)
-    .then(response => {
-      res.status(200).json({ data: response });
-    })
-    .catch(error => next(error));
+  try{
+    const { id } = req.params;
+  
+    if(ytapi){
+      // let results = await YoutubeApiService.SearchChannelsById(id)
+    }
+    else{
+      ChannelService.searchChannelsById(
+        req.app.get('db'),
+        id
+      )
+        .then(response => {
+          res.status(200).json({ data: response })
+        })
+        .catch(error => next(error))
+    }
+  }
+  catch(error){
+    next(error)
+  }
 });
 
 module.exports = ChannelRouter;

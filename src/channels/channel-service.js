@@ -124,6 +124,14 @@ const ChannelService = {
       .where('c.title', 'ILIKE', searchTerm)
       .orWhere('k.title', 'ILIKE', searchTerm)
   },
+  searchChannelsById(db, id){
+    return db
+      .select('c.title', 'c.yt_id', 'c.thumbnail', 'c.description', 'c.rating_total', 'rating_count')
+      .from('channel AS c')
+      .leftJoin('channel_keyword AS ck', 'c.id', 'ck.channel_id')
+      .leftJoin('keyword AS k', 'ck.keyword_id', 'k.id')
+      .where('c.yt_id', id)
+  },
   serializeChannel(channel){
     return {
       title: channel.snippet.channelTitle,

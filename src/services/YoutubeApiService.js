@@ -17,6 +17,12 @@ const YoutubeApiService = {
     ).then(res => res.json());
   },
 
+  SearchChannelsById(id) {
+    return fetch(
+      `${baseURL}/search?part=snippet&channelId=${id}&key=${YT_API_KEY}`
+    ).then(res => res.json());
+  },
+
   ChannelDetails(channelId) {
     return fetch(
       `${baseURL}/channels?part=snippet%2Cstatistics%2CtopicDetails%2CbrandingSettings&id=${channelId}&maxResults=1&key=${YT_API_KEY}`
