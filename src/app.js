@@ -19,7 +19,8 @@ const morganOption = NODE_ENV === 'production' ? 'tiny' : 'common';
 
 const whitelist = [
   'http://localhost:3000',
-  'https://ytdb-client-lcu68hpho.now.sh'
+  'https://ytdb-client-lcu68hpho.now.sh',
+  'https://ytdb-client.jonathanlassen.now.sh/'
 ];
 const options = {
   origin: function(origin, callback) {
