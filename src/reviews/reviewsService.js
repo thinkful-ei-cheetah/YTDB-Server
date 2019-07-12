@@ -1,11 +1,27 @@
 ('use strict');
 
 const ReviewsService = {
-  addReview(knex, user_id, text, channel_id, total_likes, total_dislikes) {
-    return knex
-      .insert({ user_id, text, channel_id, total_likes, total_dislikes })
-      .into('review')
-      .returning('*');
+  addReview(knex, user_id, text, yt_id, total_likes, total_dislikes) {
+    var query = knex
+      .select('*')
+      .from('channel')
+      .where('yt_id', yt_id);
+
+    return query.then((res) => {
+      let channel_id;
+      if (res[0].id) {
+        channel_id = res[0].id;
+      }
+      if(channel_id) {
+        return knex
+          .insert({ user_id, text, channel_id, total_likes, total_dislikes })
+          .into('review')
+          .returning('*');
+      } else
+      {
+        return;
+      }
+    });  
   },
 
   getChannelReviews(knex, channel_id) {

@@ -12,7 +12,7 @@ ReviewsRouter.get('/', (req, res) => {
 
 
 ReviewsRouter.route('/:id').get(async (req, res, next) => {
-    const  ytapi_id  = req.params.id;
+    const ytapi_id  = req.params.id;
    // const ytapi_id = xss(id);
 
     ReviewsService.getChannelReviews(
@@ -27,6 +27,9 @@ ReviewsRouter.route('/:id').get(async (req, res, next) => {
 
 ReviewsRouter.post('/', requireAuth, jsonBodyParser, (req, res, next) => {
   const { text, channelId } = req.body;
+
+  console.log(req.body)
+
   const total_likes = 0;
   const total_dislikes = 0;
 
@@ -37,14 +40,14 @@ ReviewsRouter.post('/', requireAuth, jsonBodyParser, (req, res, next) => {
         .json({ error: `Missing ${field} in request body` });
   }
 
-  ReviewsService.addReview(
-    req.app.get('db'),
-    req.user.id,
-    text,
-    channelId,
-    total_likes,
-    total_dislikes
-  )
+    ReviewsService.addReview(
+      req.app.get('db'),
+      req.user.id,
+      text,
+      channelId,
+      total_likes,
+      total_dislikes
+    )
     .then(response => {
       res.status(201).json({ response: response[0].text });
     })
