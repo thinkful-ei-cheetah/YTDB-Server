@@ -4,9 +4,25 @@ const ReviewsRouter = express.Router();
 const jsonBodyParser = express.json();
 const ReviewsService = require('./reviewsService');
 const { requireAuth } = require('../middleware/jwt-auth');
+const xss = require('xss')
 
 ReviewsRouter.get('/', (req, res) => {
   return res.json({ page: 'reviews' });
+});
+
+
+ReviewsRouter.route('/:id').get(async (req, res, next) => {
+    const  ytapi_id  = req.params.id;
+   // const ytapi_id = xss(id);
+
+    ReviewsService.getChannelReviews(
+      req.app.get('db'),
+      ytapi_id
+    )
+    .then(response => {
+      res.status(201).json({ response });
+    })
+    .catch(error => next(error));
 });
 
 ReviewsRouter.post('/', requireAuth, jsonBodyParser, (req, res, next) => {

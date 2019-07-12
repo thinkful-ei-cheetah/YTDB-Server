@@ -8,6 +8,25 @@ const ReviewsService = {
       .returning('*');
   },
 
+  getChannelReviews(knex, channel_id) {
+    var query = knex
+      .select('*')
+      .from('channel')
+      .where('yt_id', channel_id);
+
+    return query.then((res) => {
+      if(res[0].id) {
+        return knex
+          .select('*')
+          .from('review')
+          .where('id', res[0].id);
+      } else
+      {
+        return;
+      }
+    });
+  },
+
   rateReview(knex, user_id, review_id, opinion) {
     if (opinion) {
       return knex
