@@ -25,17 +25,21 @@ const ReviewsService = {
   },
 
   getChannelReviews(knex, channel_id) {
+
+    console.log(channel_id)
     var query = knex
       .select('*')
       .from('channel')
       .where('yt_id', channel_id);
 
     return query.then((res) => {
+
+      console.log(res[0].id)
       if(res[0].id) {
         return knex
           .select('*')
           .from('review')
-          .where('id', res[0].id);
+          .where('channel_id', res[0].id);
       } else
       {
         return;
