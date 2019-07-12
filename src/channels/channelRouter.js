@@ -126,14 +126,57 @@ ChannelRouter.route('/search/:search_term/:ytapi/:topicId').get(async (req, res,
   }
 });
 
-ChannelRouter.route('/:id').get((req, res, next) => {
-  const { id } = req.params;
+ChannelRouter.route('/:id').get( async (req, res, next) => {
+  try {
+    const { id } = req.params;
 
-  YoutubeApiService.ChannelDetails(id)
-    .then(response => {
-      res.status(200).json({ data: response });
-    })
-    .catch(error => next(error));
+    let whatWeHave = await ChannelService.dirtyDetails( req.app.get('db'), id )
+    console.log(whatWeHave)
+    let now = new Date()
+    let timeDiff = now.getTime() - whatWeHave.date_updated.getTime()
+    if ((timeDiff > 86400000) || (whatWeHave.subscriber_count === null)){
+      console.log('MAKE YOUTUBE API CALL!!!!!!!!')
+      let dirtyDetails = await YoutubeApiService.ChannelDetails(id)
+      let topics = dirtyDetails.items[0].topicDetails.topicIds
+      console.log('dirtyDetails topicDetails ========>', topics)
+      let keywords = dirtyDetails.items[0].brandingSettings.channel.keywords.replace(/['"“＂〃ˮײ″״‶˶]/g, "")
+      keywords = keywords.split(' ')
+      console.log('dirtyDetails brandingSettings ========>', keywords)
+
+      await ChannelService.inputDirtyDetails(
+        req.app.get('db'), 
+        id,
+        dirtyDetails.items[0].statistics
+      )
+
+      for(let i = 0; i < topics.length; i++){
+        await ChannelService.insertOrUpdateChannelTopics(
+          req.app.get('db'),
+          topics[i],
+          [{yt_id: id}]
+        )
+      }
+
+      res.status(200).json({ data: dirtyDetails });
+    }
+    else {
+      console.log('MAKE OUR API CALL!!!!!!!!')
+      let keywords = await ChannelService.myKeywords( req.app.get('db'), whatWeHave.id )
+      let topics = await ChannelService.myTopics( req.app.get('db'), whatWeHave.id )
+      keywords = keywords.map(keyword => keyword.title)
+      topics = topics.map(topic => topic.title)
+      console.log('keywords =====>', keywords)
+      console.log('topics   =====>', topics)
+      whatWeHave.keywords = keywords
+      whatWeHave.topics = topics
+      console.log('whatWeHave ======>', whatWeHave)
+
+      res.status(200).json({ data: whatWeHave })
+    }
+  }
+  catch(error){
+    next(error)
+  }
 });
 
 module.exports = ChannelRouter;
