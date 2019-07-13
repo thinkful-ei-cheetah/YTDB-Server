@@ -1,4 +1,5 @@
-CREATE TABLE "category" (
+CREATE TABLE "topic" (
   "id" SERIAL PRIMARY KEY,
+  "titleId" TEXT NOT NULL UNIQUE,
   "title" VARCHAR NOT NULL UNIQUE
 );

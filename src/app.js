@@ -10,12 +10,19 @@ const reviewsRouter = require('./reviews/reviewsRouter');
 const channelRouter = require('./channels/channelRouter');
 const dashboardRouter = require('./dashboard/dashboardRouter');
 const userRouter = require('./user/userRouter');
+const channelRatingRouter = require('./channelrating/channelRatingRouter');
+const favoriteRouter = require('./favorite/favoriteRouter');
 
 const app = express();
 
 const morganOption = NODE_ENV === 'production' ? 'tiny' : 'common';
 
-const whitelist = ['http://localhost:3000'];
+const whitelist = [
+  'http://localhost:3000',
+  'https://ytdb-client-lcu68hpho.now.sh',
+  'https://ytdb-client.jonathanlassen.now.sh/'
+];
+
 const options = {
   origin: function(origin, callback) {
     if (whitelist.indexOf(origin) !== -1 || !origin) {
@@ -39,6 +46,8 @@ app.use('/api/reviews', reviewsRouter);
 app.use('/api/channels', channelRouter);
 app.use('/api/dashboard', dashboardRouter);
 app.use('/api/user', userRouter);
+app.use('/api/rating', channelRatingRouter);
+app.use('/api/favorite', favoriteRouter);
 
 app.use(function errorHandler(error, req, res, next) {
   let response;
