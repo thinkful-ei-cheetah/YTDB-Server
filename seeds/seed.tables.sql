@@ -24,7 +24,7 @@ VALUES
     'normal'
   );
 
-INSERT INTO "channel" ("id", "yt_id", "title", "thumbnail", "rating_total", "rating_count", "total-videos", "comment-count", "view-count", "subscriber-count", "description")
+INSERT INTO "channel" ("id", "yt_id", "title", "thumbnail", "rating_total", "rating_count", "total_videos", "comment_count", "view_count", "subscriber_count", "description")
 VALUES
   (1, 'UCncxKtsdgI9ruYkmYbNWh6Q', 'Trix', 'https://yt3.ggpht.com/a/AGF-l78Bd2CMucpbhI_YjodXmJWSRugVMaAk01wsIw=s88-mo-c-c0xffffffff-rj-k-no', 9, 1, 58, 0, 2974384, 25136, 'Experienced and seasoned player in the "Medieval Melee" genre. MORDHAU and other skill-based titles are the main focus of my channel.Please use my business email for business related enquiries only. If you wish to contact me for any other reason please use the email address listed below.Email: Trix.Gaming.General@gmail.comChannel art by KennyDaFinn. Check him out on Twitch: https://www.twitch.tv/kennydafinn'),
   (2, 'UCeAnD6rMvvNDvo7uG9FT-mQ', 'MORDHAU', 'https://yt3.ggpht.com/-H3iKbbDm3Hw/AAAAAAAAAAI/AAAAAAAAAAA/taFSC3nkcDo/s88-c-k-no-mo-rj-c0xffffff/photo.jpg', 0, 0, 12, 0, 2875596, 28355, 'Mordhau is an upcoming medieval first-person fighting game with a strong emphasis on skill-based competitive play. For more information visit ...'),

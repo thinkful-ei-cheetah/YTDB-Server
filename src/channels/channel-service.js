@@ -1,5 +1,6 @@
 const util = require('util')
 const xss = require('xss')
+const escape = require('pg-escape')
 
 const ChannelService = {
   searchChannels(db, searchTerm){
@@ -8,7 +9,8 @@ const ChannelService = {
       .from('channel AS c')
       .leftJoin('channel_keyword AS ck', 'c.id', 'ck.channel_id')
       .leftJoin('keyword AS k', 'ck.keyword_id', 'k.id')
-      .where('c.title', 'ILIKE', searchTerm)
+      // .where('c.title', 'ILIKE', searchTerm)
+      .where('c.title', 'ILIKE', '%'+searchTerm+'%')
       .orWhere('k.title', 'ILIKE', searchTerm)
   },
   searchChannelsByTopic(db, searchTerm, topicId){
@@ -20,7 +22,8 @@ const ChannelService = {
       .leftJoin('channel_topic AS ct', 'c.id', 'ct.channel_id')
       .leftJoin('topic AS t', 'ct.topic_id', 't.id')
       // .where('c.title', 'ILIKE', searchTerm)
-      .where({'c.title': searchTerm, 't.titleId': topicId})
+      // .where({'c.title': searchTerm, 't.titleId': topicId})
+      .where({'c.title': '%'+searchTerm+'%', 't.titleId': topicId})
       .orWhere({'k.title': searchTerm, 't.titleId': topicId})
       // .orWhere('k.title', 'ILIKE', searchTerm)
       // .whereIn('t.titleId', topicId)
@@ -47,7 +50,7 @@ const ChannelService = {
           yt_id: channel.id.channelId,
           title: xss(channel.snippet.channelTitle),
           thumbnail: xss(channel.snippet.thumbnails.default.url),
-          description: xss(channel.snippet.description)
+          description: xss(channel.snippet.description).replace(/['"“＂〃ˮײ″״‶˶]/g, "'")
           // 'date_updated': date
         }
         const insert = trx('channel').insert(data).toString()
@@ -95,7 +98,43 @@ const ChannelService = {
       }
     })
   },
+  insertOrUpdateChannelKeywordsForDirtyDetails(db, keywords, yt_id){
+    let uniqKeywords = [...new Set(keywords)]
+    return db.transaction(async trx => {
+      let channelId = await trx('channel')
+        .select('id')
+        .where({ yt_id })
+        .first()
+      channelId = channelId.id
+      let existy = await trx('channel_keyword')
+        .select('*')
+        .leftJoin('keyword', 'channel_keyword.keyword_id', 'keyword.id')
+        .where('channel_id', channelId)
+      let listy = existy.map( keyword => keyword.title )
+      for(let i = 0; i < uniqKeywords.length; i++){
+        if(!listy.includes(uniqKeywords[i])){
+          let keywordId = await trx('keyword')
+            .select('id')
+            .where('title', uniqKeywords[i])
+            .first()
+          if(keywordId === undefined){
+            keywordId = await trx('keyword')
+              .insert({ title: uniqKeywords[i] })
+              .returning('id')
+            keywordId = keywordId[0]
+          }
+          else{
+            keywordId = keywordId.id
+          }
+          await trx('channel_keyword')
+            .insert({ channel_id: channelId, keyword_id: keywordId })
+        }
+      }
+    })
+  },
   insertOrUpdateChannelTopics(db, topicId, channels){
+    console.log('topicId =========>', topicId)
+    console.log('channels ========>', channels)
     return db.transaction(async trx => {
       let existy = await trx('channel')
         .select('channel.yt_id', 'channel.title AS channel_title', 'channel_topic.channel_id', 'channel_topic.topic_id', 'topic.title', 'topic.titleId')
@@ -117,14 +156,61 @@ const ChannelService = {
       }
     })
   },
-  searchChannels(db, searchTerm){
+  insertOrUpdateChannelTopicsForDirtyDetails(db, topicIds, yt_id){
+    let uniqTopicIds = [...new Set(topicIds)]
+    return db.transaction(async trx => {
+      let channelId = await trx('channel')
+        .select('id')
+        .where({ yt_id })
+        .first()
+      channelId = channelId.id
+      let existy = await trx('channel_topic')
+        .select('*')
+        .leftJoin('topic', 'channel_topic.topic_id', 'topic.id')
+        .where('channel_id', channelId)
+      let listy = existy.map( topic => topic.titleId )
+      for(let i = 0; i < uniqTopicIds.length; i++){
+        if(!listy.includes(uniqTopicIds[i])){
+          let topicId = await trx('topic')
+            .select('id')
+            .where('titleId', uniqTopicIds[i])
+            .first()
+          await trx('channel_topic').insert({channel_id: channelId, topic_id: topicId.id})
+        }
+      }
+    })
+  },
+  dirtyDetails(db, yt_id){
     return db
-      .select('c.title', 'c.yt_id', 'c.thumbnail', 'c.description', 'c.rating_total', 'rating_count')
+      .select('c.id', 'c.title', 'c.yt_id', 'c.thumbnail', 'c.description', 'c.rating_total', 'c.rating_count', 'c.date_updated', 'c.total_videos', 'c.subscriber_count', 'c.view_count', 'c.comment_count')
+      // .select('c.title', 'c.yt_id', 'c.thumbnail', 'c.description', 'c.rating_total', 'rating_count', 'k.title AS keyword_title', 't.title AS topic_title', 'c.date_updated', 'c.total_videos', 'c.subscriber_count', 'c.view_count', 'c.comment_count')
       .from('channel AS c')
-      .leftJoin('channel_keyword AS ck', 'c.id', 'ck.channel_id')
+      // .leftJoin('channel_keyword AS ck', 'c.id', 'ck.channel_id')
+      // .leftJoin('keyword AS k', 'ck.keyword_id', 'k.id')
+      // .leftJoin('channel_topic AS ct', 'c.id', 'ct.channel_id')
+      // .leftJoin('topic AS t', 'ct.topic_id', 't.id')
+      .where({yt_id})
+      .first()
+  },
+  myKeywords(db, id){
+    return db
+      .select('*')
+      .from('channel_keyword AS ck')
       .leftJoin('keyword AS k', 'ck.keyword_id', 'k.id')
-      .where('c.title', 'ILIKE', searchTerm)
-      .orWhere('k.title', 'ILIKE', searchTerm)
+      .where('ck.channel_id', id)
+  },
+  myTopics(db, id){
+    return db
+      .select('*')
+      .from('channel_topic AS ct')
+      .leftJoin('topic AS t', 'ct.topic_id', 't.id')
+      .where('ct.channel_id', id)
+  },
+  inputDirtyDetails(db, yt_id, statistics){
+    let date_updated = new Date()
+    return db('channel')
+      .update({ total_videos: parseInt(statistics.videoCount), subscriber_count: parseInt(statistics.subscriberCount), view_count: parseInt(statistics.viewCount), comment_count: parseInt(statistics.commentCount), date_updated })
+      .where({ yt_id })
   },
   serializeChannel(channel){
     return {
@@ -135,6 +221,21 @@ const ChannelService = {
       "rating_total": null,
       "rating_count": null
     }
+  },
+  serializeDirtyDetails(channel){
+    title,
+    yt_id,
+    thumbnail,
+    description,
+    rating_total,
+    rating_count,
+    keyword_title,
+    topic_title,
+    date_updated,
+    total_videos,
+    subscriber_count,
+    view_count,
+    comment_count
   }
 }
 

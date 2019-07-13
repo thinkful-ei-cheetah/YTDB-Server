@@ -22,6 +22,7 @@ const whitelist = [
   'https://ytdb-client-lcu68hpho.now.sh',
   'https://ytdb-client.jonathanlassen.now.sh/'
 ];
+
 const options = {
   origin: function(origin, callback) {
     if (whitelist.indexOf(origin) !== -1 || !origin) {
