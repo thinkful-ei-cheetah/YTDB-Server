@@ -98,7 +98,43 @@ const ChannelService = {
       }
     })
   },
+  insertOrUpdateChannelKeywordsForDirtyDetails(db, keywords, yt_id){
+    let uniqKeywords = [...new Set(keywords)]
+    return db.transaction(async trx => {
+      let channelId = await trx('channel')
+        .select('id')
+        .where({ yt_id })
+        .first()
+      channelId = channelId.id
+      let existy = await trx('channel_keyword')
+        .select('*')
+        .leftJoin('keyword', 'channel_keyword.keyword_id', 'keyword.id')
+        .where('channel_id', channelId)
+      let listy = existy.map( keyword => keyword.title )
+      for(let i = 0; i < uniqKeywords.length; i++){
+        if(!listy.includes(uniqKeywords[i])){
+          let keywordId = await trx('keyword')
+            .select('id')
+            .where('title', uniqKeywords[i])
+            .first()
+          if(keywordId === undefined){
+            keywordId = await trx('keyword')
+              .insert({ title: uniqKeywords[i] })
+              .returning('id')
+            keywordId = keywordId[0]
+          }
+          else{
+            keywordId = keywordId.id
+          }
+          await trx('channel_keyword')
+            .insert({ channel_id: channelId, keyword_id: keywordId })
+        }
+      }
+    })
+  },
   insertOrUpdateChannelTopics(db, topicId, channels){
+    console.log('topicId =========>', topicId)
+    console.log('channels ========>', channels)
     return db.transaction(async trx => {
       let existy = await trx('channel')
         .select('channel.yt_id', 'channel.title AS channel_title', 'channel_topic.channel_id', 'channel_topic.topic_id', 'topic.title', 'topic.titleId')
@@ -116,6 +152,30 @@ const ChannelService = {
             .where('channel.yt_id', channels[i])
             .first()
           await trx('channel_topic').insert({channel_id: channelId.id, topic_id: topicIdId.id})
+        }
+      }
+    })
+  },
+  insertOrUpdateChannelTopicsForDirtyDetails(db, topicIds, yt_id){
+    let uniqTopicIds = [...new Set(topicIds)]
+    return db.transaction(async trx => {
+      let channelId = await trx('channel')
+        .select('id')
+        .where({ yt_id })
+        .first()
+      channelId = channelId.id
+      let existy = await trx('channel_topic')
+        .select('*')
+        .leftJoin('topic', 'channel_topic.topic_id', 'topic.id')
+        .where('channel_id', channelId)
+      let listy = existy.map( topic => topic.titleId )
+      for(let i = 0; i < uniqTopicIds.length; i++){
+        if(!listy.includes(uniqTopicIds[i])){
+          let topicId = await trx('topic')
+            .select('id')
+            .where('titleId', uniqTopicIds[i])
+            .first()
+          await trx('channel_topic').insert({channel_id: channelId, topic_id: topicId.id})
         }
       }
     })
