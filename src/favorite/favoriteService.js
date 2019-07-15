@@ -8,12 +8,19 @@ const FavoriteService = {
   },
 
   getFavorites(knex, user_id) {
-    return knex('favorite')
-      .where({ user_id })
-      .join('channel', 'favorite.channel_id', '=', 'channel.id')
+    // return knex('favorite')
+    //   .where({ user_id })
+    //   .join('channel', 'favorite.channel_id', '=', 'channel.id')
+    //   .select('channel.id', 'channel.title', 'channel.thumbnail')
+    //   .then(favorites => favorites);
+
+    return knex
       .select('channel.id', 'channel.title', 'channel.thumbnail')
-      .then(favorites => favorites);
+      .from('favorite')
+      .leftJoin('channel', 'favorite.channel_id', 'channel.id')
+      .where({ user_id });
   },
+
   deleteFavorites(knex, user_id, channel_id) {
     return knex('favorite')
       .where({
@@ -22,6 +29,13 @@ const FavoriteService = {
       })
       .del()
       .returning('*');
+  },
+
+  findChannelByYoutubeId(knex, yt_id) {
+    return knex('channel')
+      .select('id')
+      .where({ yt_id })
+      .first();
   }
 };
 
