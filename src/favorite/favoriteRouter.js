@@ -7,17 +7,23 @@ const { requireAuth } = require('../middleware/jwt-auth');
 
 FavoriteRouter.route('/')
   .all(requireAuth)
-  .post(jsonBodyParser, (req, res, next) => {
-    const { channelId } = req.body;
+  .post(jsonBodyParser, async (req, res, next) => {
+    const { yt_id } = req.body;
 
-    for (const field of ['channelId']) {
+    for (const field of ['yt_id']) {
       if (!req.body[field])
         return res.status(400).json({
           error: `Missing '${field}' in request body`
         });
     }
 
-    FavoriteService.addFavorite(req.app.get('db'), req.user.id, channelId)
+    let channelId = await FavoriteService.findChannelByYoutubeId(
+      req.app.get('db'),
+      yt_id
+    );
+    console.log(channelId);
+
+    FavoriteService.addFavorite(req.app.get('db'), req.user.id, channelId.id)
       .then(favorite => {
         res.status(201).json(favorite[0]);
       })
