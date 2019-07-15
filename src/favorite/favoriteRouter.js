@@ -51,7 +51,7 @@ FavoriteRouter.route('/')
       yt_id
     );
 
-    FavoriteService.deleteFavorites(req.app.get('db'), req.user.id, channelId)
+    FavoriteService.deleteFavorites(req.app.get('db'), req.user.id, channelId.id)
       .then(favorites => {
         res.status(200).json(favorites[0]);
       })
