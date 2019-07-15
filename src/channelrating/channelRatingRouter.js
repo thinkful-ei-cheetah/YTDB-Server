@@ -5,8 +5,10 @@ const jsonBodyParser = express.json();
 const { requireAuth } = require('../middleware/jwt-auth');
 const ChannelRatingService = require('./channelRatingService');
 
-ChannelRatingRouter.route('/')
-  .post(requireAuth, jsonBodyParser, (req, res, next) => {
+ChannelRatingRouter.route('/').post(
+  requireAuth,
+  jsonBodyParser,
+  (req, res, next) => {
     const { rating, channelId } = req.body;
 
     for (const field of ['rating', 'channelId']) {
@@ -26,9 +28,17 @@ ChannelRatingRouter.route('/')
         res.status(201).json({ rating: response[0].rating });
       })
       .catch(error => next(error));
-  })
-  .get(jsonBodyParser, (req, res, next) => {
-    res.json({ hello: 'this workds' });
-  });
+  }
+);
+
+ChannelRatingRouter.route('/:id').get(requireAuth, (req, res, next) => {
+  const { id } = req.params;
+
+  ChannelRatingService.getUserRating(req.app.get('db'), req.user.id, id)
+    .then(response => {
+      res.status(200).json({ rating: response.rating });
+    })
+    .catch(error => next(error));
+});
 
 module.exports = ChannelRatingRouter;

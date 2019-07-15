@@ -16,9 +16,16 @@ const ChannelRatingService = {
           })
           .returning('*');
       });
+  },
+
+  getUserRating(knex, user_id, channel_id) {
+    return knex('channel_rating')
+      .first('rating')
+      .where({ user_id, channel_id })
+      .then(response => {
+        return response;
+      });
   }
 };
-
-//do plus equals to total and incrmeent count
 
 module.exports = ChannelRatingService;
