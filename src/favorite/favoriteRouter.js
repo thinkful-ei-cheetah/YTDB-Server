@@ -36,15 +36,20 @@ FavoriteRouter.route('/')
       })
       .catch(error => next(error));
   })
-  .delete(jsonBodyParser, (req, res, next) => {
-    const { channelId } = req.body;
+  .delete(jsonBodyParser, async (req, res, next) => {
+    const { yt_id } = req.body;
 
-    for (const field of ['channelId']) {
+    for (const field of ['yt_id']) {
       if (!req.body[field])
         return res.status(400).json({
           error: `Missing '${field}' in request body`
         });
     }
+
+    let channelId = await FavoriteService.findChannelByYoutubeId(
+      req.app.get('db'),
+      yt_id
+    );
 
     FavoriteService.deleteFavorites(req.app.get('db'), req.user.id, channelId)
       .then(favorites => {

@@ -15,7 +15,12 @@ const FavoriteService = {
     //   .then(favorites => favorites);
 
     return knex
-      .select('channel.id', 'channel.title', 'channel.thumbnail')
+      .select(
+        'channel.id',
+        'channel.title',
+        'channel.thumbnail',
+        'channel.yt_id'
+      )
       .from('favorite')
       .leftJoin('channel', 'favorite.channel_id', 'channel.id')
       .where({ user_id });
@@ -27,8 +32,7 @@ const FavoriteService = {
         'favorite.user_id': user_id,
         'favorite.channel_id': channel_id
       })
-      .del()
-      .returning('*');
+      .del();
   },
 
   findChannelByYoutubeId(knex, yt_id) {
