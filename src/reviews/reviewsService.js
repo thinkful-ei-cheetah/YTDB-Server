@@ -24,19 +24,17 @@ const ReviewsService = {
   },
 
   getChannelReviews(knex, channel_id) {
-    console.log(channel_id);
     var query = knex
       .select('*')
       .from('channel')
       .where('yt_id', channel_id);
 
     return query.then(res => {
-      console.log(res[0].id);
       if (res[0].id) {
-        return knex
-          .select('*')
-          .from('review')
-          .where('channel_id', res[0].id);
+        return knex('review')
+          .leftJoin('user', 'review.user_id', 'user.id')
+          .select('review.*', 'user.username')
+          .where('review.channel_id', res[0].id);
       } else {
         return;
       }
@@ -62,7 +60,6 @@ const ReviewsService = {
         .into('review_rating')
         .returning('*')
         .then(response => {
-          console.log(response);
           return knex('review')
             .where('id', '=', response[0].review_id)
             .update('date_updated', knex.fn.now())
