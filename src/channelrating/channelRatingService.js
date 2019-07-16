@@ -18,6 +18,47 @@ const ChannelRatingService = {
       });
   },
 
+  checkUserRating(db, user_id, channel_id){
+    return db
+      .from('channel_rating')
+      .select('*')
+      .where({ user_id, channel_id })
+  },
+
+  updateUserRating(db, user_id, channel_id, newRating, oldRating){
+    return db.transaction(async trx => {
+      await trx('channel_rating')
+        .where({user_id, channel_id})
+        .update('rating', newRating)
+      let ratingDiff = newRating - oldRating
+      console.log('ratingDiff ======>', ratingDiff)
+
+      let ratingTotal = await trx('channel')
+        .select('rating_total')
+        .where('id', channel_id)
+        .first()
+      console.log('ratingTotal ====>', ratingTotal)
+      if(ratingDiff > 0){
+        await trx('channel')
+          .increment('rating_total', ratingDiff)
+          .where('id', channel_id)
+      }
+
+      else{
+        await trx('channel')
+          .decrement('rating_total', Math.abs(ratingDiff))
+          .where('id', channel_id)
+      }
+      
+      let newRatingTotal = await trx('channel')
+        .select('rating_total')
+        .where('id', channel_id)
+        .first()
+      
+      console.log('newRatingTotal ====>', newRatingTotal)
+    })
+  },
+
   getUserRating(knex, user_id, channel_id) {
     return knex('channel_rating')
       .first('rating')
