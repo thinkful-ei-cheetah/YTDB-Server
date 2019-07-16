@@ -66,11 +66,24 @@ function createUser(user, db) {
 }
 
 function makeAuthHeader(user, secret = process.env.JWT_SECRET) {
-  const token = jwt.sign({ user_id: user.id }, secret, {
-    subject: user.user_name,
+  const token = jwt.sign({ id: user.id }, secret, {
+    subject: user.username,
     algorithm: 'HS256'
   });
   return `Bearer ${token}`;
 }
 
-module.exports = { getDB, clearTables, makeAuthHeader, createUser };
+function createChannel(db, channel) {
+  return db
+    .into('channel')
+    .insert(channel)
+    .returning('*');
+}
+
+module.exports = {
+  getDB,
+  clearTables,
+  makeAuthHeader,
+  createUser,
+  createChannel
+};
