@@ -18,7 +18,7 @@ describe('/API/USER endpoint', () => {
   });
 
   after('disconnect from db', () => {
-    return clearTables(db).then(response => {
+    return clearTables(db).then(() => {
       return db.destroy();
     });
   });
