@@ -19,7 +19,8 @@ const FavoriteService = {
         'channel.id',
         'channel.title',
         'channel.thumbnail',
-        'channel.yt_id'
+        'channel.yt_id',
+        'channel.description'
       )
       .from('favorite')
       .leftJoin('channel', 'favorite.channel_id', 'channel.id')
