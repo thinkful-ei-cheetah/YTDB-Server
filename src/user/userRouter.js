@@ -1,13 +1,43 @@
 'use strict';
 const express = require('express');
 const UserRouter = express.Router();
+const { requireAuth } = require('../middleware/jwt-auth');
 
 const jsonBodyParser = express.json();
 const UserService = require('./userService');
 
-UserRouter.get('/', (req, res) => {
-  return res.json({ page: 'user' });
+UserRouter.route('/').get(requireAuth, async (req, res) => {
+  console.log('user id =====>', req.user.id)
+  let userInfo = await UserService.getUserById(req.app.get('db'), req.user.id)
+  if(!userInfo){
+    return res.status(400).json({
+      error: 'User does not existy'
+    });
+  }
+  return res.json(userInfo);
 });
+
+// ChannelRouter.route('/:id/userrating').get(requireAuth, async (req, res, next) => {
+//   try {
+//     let { id } = req.params;
+//     id = parseInt(id, 10)
+//     console.log('channel id =====>', id)
+//     console.log('user id =====>', req.user.id)
+//     let userRating = await ChannelService.getUserRating(
+//       req.app.get('db'),
+//       req.user.id,
+//       id
+//     )
+//     console.log('userRating ====>', userRating)
+//     if(userRating === undefined){
+//       userRating = {rating: 0}
+//     }
+//     res.status(200).json(userRating)
+//   }
+//   catch(error){
+//     next(error)
+//   }
+// });
 
 UserRouter.post('/', jsonBodyParser, (req, res, next) => {
   const { username, password } = req.body;
@@ -22,6 +52,7 @@ UserRouter.post('/', jsonBodyParser, (req, res, next) => {
 
   UserService.getUserWithUserName(req.app.get('db'), loginUser.username)
     .then(dbUser => {
+      console.log('dbUser ======>', dbUser)
       if (!dbUser)
         return res.status(400).json({
           error: 'Incorrect Username or Password'

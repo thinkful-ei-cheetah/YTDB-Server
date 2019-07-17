@@ -11,6 +11,13 @@ const UserService = {
       .where({ username })
       .first();
   },
+  getUserById(db, id){
+    return db
+      .from('user')
+      .select('id','name','username','type')
+      .where({ id })
+      .first();
+  },
 
   comparePasswords(login_password, user_password) {
     return bcrypt.compare(login_password, user_password);
