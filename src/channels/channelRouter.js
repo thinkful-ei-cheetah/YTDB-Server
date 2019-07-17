@@ -4,6 +4,7 @@ const ChannelRouter = express.Router();
 const YoutubeApiService = require('../services/YoutubeApiService');
 const ChannelService = require('./channel-service');
 const jsonBodyParser = express.json();
+const { requireAuth } = require('../middleware/jwt-auth');
 
 const xss = require('xss');
 
@@ -137,13 +138,13 @@ ChannelRouter.route('/:id').get( async (req, res, next) => {
     if ((timeDiff > 86400000) || (whatWeHave.subscriber_count === null)){
       console.log('MAKE YOUTUBE API CALL!!!!!!!!')
       let dirtyDetails = await YoutubeApiService.ChannelDetails(id)
-      // console.log('dirtyDetails', dirtyDetails)
-      let topics = dirtyDetails.items[0].topicDetails.topicIds
+      console.log('dirtyDetails', dirtyDetails)
+      let topics = dirtyDetails.items[0].topicDetails
       if(topics){
         // console.log('dirtyDetails topicDetails ========>', topics)
         await ChannelService.insertOrUpdateChannelTopicsForDirtyDetails(
           req.app.get('db'),
-          topics,
+          topics.topicIds,
           id
         )
       }
@@ -177,9 +178,28 @@ ChannelRouter.route('/:id').get( async (req, res, next) => {
     // console.log('topics   =====>', topics)
     whatWeHave.keywords = keywords
     whatWeHave.topics = topics
-    console.log('About to send back ======>', whatWeHave)
-
     res.status(200).json({ data: whatWeHave })
+  }
+  catch(error){
+    next(error)
+  }
+});
+ChannelRouter.route('/:id/userrating').get(requireAuth, async (req, res, next) => {
+  try {
+    let { id } = req.params;
+    id = parseInt(id, 10)
+    console.log('channel id =====>', id)
+    console.log('user id =====>', req.user.id)
+    let userRating = await ChannelService.getUserRating(
+      req.app.get('db'),
+      req.user.id,
+      id
+    )
+    console.log('userRating ====>', userRating)
+    if(userRating === undefined){
+      userRating = {rating: 0}
+    }
+    res.status(200).json(userRating)
   }
   catch(error){
     next(error)

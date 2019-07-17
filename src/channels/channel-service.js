@@ -175,7 +175,12 @@ const ChannelService = {
             .select('id')
             .where('titleId', uniqTopicIds[i])
             .first()
-          await trx('channel_topic').insert({channel_id: channelId, topic_id: topicId.id})
+          try{
+            await trx('channel_topic').insert({channel_id: channelId, topic_id: topicId.id})
+          }
+          finally{
+            console.log(`tried to insert topic "${topicId}" for channel "${channelId}"`)
+          }
         }
       }
     })
@@ -221,6 +226,13 @@ const ChannelService = {
       "rating_total": null,
       "rating_count": null
     }
+  },
+  getUserRating(db, user_id, channel_id){
+    return db
+      .from('channel_rating')
+      .select('rating')
+      .where({ user_id, channel_id })
+      .first()
   },
   serializeDirtyDetails(channel){
     title,
