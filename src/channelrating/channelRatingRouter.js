@@ -8,7 +8,7 @@ const ChannelRatingService = require('./channelRatingService');
 ChannelRatingRouter.route('/').post(
   requireAuth,
   jsonBodyParser,
-  (req, res, next) => {
+  async (req, res, next) => {
     const { rating, channelId } = req.body;
 
     for (const field of ['rating', 'channelId']) {
@@ -18,16 +18,45 @@ ChannelRatingRouter.route('/').post(
           .json({ error: `Missing ${field} in request body` });
     }
 
-    ChannelRatingService.addUserRating(
+    let existy = await ChannelRatingService.checkUserRating(
       req.app.get('db'),
       req.user.id,
-      channelId,
-      rating
+      channelId
     )
-      .then(response => {
-        res.status(201).json({ rating: response[0].rating });
-      })
-      .catch(error => next(error));
+    console.log('existy =====>', existy)
+    
+    if(existy.length){
+      console.log('user rating already existy')
+      let ratingDiff = rating - existy[0].rating
+      if(ratingDiff > 0 || ratingDiff < 0){
+        console.log(`there is a difference in rating of "${ratingDiff}"`)
+        await ChannelRatingService.updateUserRating(
+          req.app.get('db'),
+          req.user.id,
+          channelId,
+          rating,
+          existy[0].rating
+        )
+        res.status(201).json({ rating: rating });
+      }
+      else{
+        console.log('no difference in rating, returning rating')
+        res.status(201).json({ rating: rating });
+      }
+    }
+    else{
+      console.log('user rating does not existy')
+      ChannelRatingService.addUserRating(
+        req.app.get('db'),
+        req.user.id,
+        channelId,
+        rating
+      )
+        .then(response => {
+          res.status(201).json({ rating: response[0].rating });
+        })
+        .catch(error => next(error));
+    }
   }
 );
 
