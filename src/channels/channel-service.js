@@ -227,6 +227,13 @@ const ChannelService = {
       "rating_count": null
     }
   },
+  getUserRating(db, user_id, channel_id){
+    return db
+      .from('channel_rating')
+      .select('rating')
+      .where({ user_id, channel_id })
+      .first()
+  },
   serializeDirtyDetails(channel){
     title,
     yt_id,
