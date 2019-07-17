@@ -137,13 +137,13 @@ ChannelRouter.route('/:id').get( async (req, res, next) => {
     if ((timeDiff > 86400000) || (whatWeHave.subscriber_count === null)){
       console.log('MAKE YOUTUBE API CALL!!!!!!!!')
       let dirtyDetails = await YoutubeApiService.ChannelDetails(id)
-      // console.log('dirtyDetails', dirtyDetails)
-      let topics = dirtyDetails.items[0].topicDetails.topicIds
+      console.log('dirtyDetails', dirtyDetails)
+      let topics = dirtyDetails.items[0].topicDetails
       if(topics){
         // console.log('dirtyDetails topicDetails ========>', topics)
         await ChannelService.insertOrUpdateChannelTopicsForDirtyDetails(
           req.app.get('db'),
-          topics,
+          topics.topicIds,
           id
         )
       }
