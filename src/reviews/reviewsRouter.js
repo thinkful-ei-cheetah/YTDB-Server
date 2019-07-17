@@ -16,7 +16,7 @@ ReviewsRouter.route('/:id').get(async (req, res, next) => {
 
   ReviewsService.getChannelReviews(req.app.get('db'), ytapi_id)
     .then(response => {
-      res.status(201).json({ response });
+      res.status(200).json({ response });
     })
     .catch(error => next(error));
 });

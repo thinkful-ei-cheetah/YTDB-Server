@@ -4,7 +4,7 @@
   "description": "find and rate youtube channels",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --require test/setup.js",
+    "test": "mocha --timeout 5000 --require test/setup.js",
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "migrate": "postgrator --config postgrator-config.js",
