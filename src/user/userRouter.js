@@ -7,9 +7,9 @@ const jsonBodyParser = express.json();
 const UserService = require('./userService');
 
 UserRouter.route('/').get(requireAuth, async (req, res) => {
-  console.log('user id =====>', req.user.id)
-  let userInfo = await UserService.getUserById(req.app.get('db'), req.user.id)
-  if(!userInfo){
+  console.log('user id =====>', req.user.id);
+  let userInfo = await UserService.getUserById(req.app.get('db'), req.user.id);
+  if (!userInfo) {
     return res.status(400).json({
       error: 'User does not existy'
     });
@@ -52,7 +52,7 @@ UserRouter.post('/', jsonBodyParser, (req, res, next) => {
 
   UserService.getUserWithUserName(req.app.get('db'), loginUser.username)
     .then(dbUser => {
-      console.log('dbUser ======>', dbUser)
+      console.log('dbUser ======>', dbUser);
       if (!dbUser)
         return res.status(400).json({
           error: 'Incorrect Username or Password'
@@ -71,7 +71,12 @@ UserRouter.post('/', jsonBodyParser, (req, res, next) => {
         const payload = { id: dbUser.id };
         res.status(200).json({
           authToken: UserService.createJwt(sub, payload),
-          user: dbUser
+          user: {
+            id: dbUser.id,
+            name: dbUser.name,
+            type: dbUser.type,
+            username: dbUser.username
+          }
         });
       });
     })
