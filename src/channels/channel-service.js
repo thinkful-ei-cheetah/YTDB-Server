@@ -49,7 +49,7 @@ const ChannelService = {
         let data = {
           yt_id: channel.id.channelId,
           title: xss(channel.snippet.channelTitle),
-          thumbnail: xss(channel.snippet.thumbnails.default.url),
+          thumbnail: xss(channel.snippet.thumbnails.medium.url),
           description: xss(channel.snippet.description).replace(/['"“＂〃ˮײ″״‶˶]/g, "'")
           // 'date_updated': date
         }
@@ -221,7 +221,7 @@ const ChannelService = {
     return {
       title: channel.snippet.channelTitle,
       "yt_id": channel.id.channelId,
-      thumbnail: channel.snippet.thumbnails.default.url,
+      thumbnail: channel.snippet.thumbnails.medium.url,
       description: channel.snippet.description,
       "rating_total": null,
       "rating_count": null
