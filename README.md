@@ -20,18 +20,90 @@ create your testdb: create db -U <username> ytdb-test
 ```
 Edit the contents of the package.json to use NEW-PROJECT-NAME instead of "name": "ytdb",
 
-==This api requires a valid Youtube API key==
+`This api requires a valid Youtube API key`
 
 ## Routes
 
 ```
-/api/registger
+/api/register
 /api/reviews
 /api/channels
-/api/dashboard
 /api/user
 /api/rating
 /api/favorite
+```
+
+### Endpoint Response Examples:
+
+/api/channels/search/:search_term/:ytapi
+```
+{
+  data: [
+    {
+      description: "Hey There! The name's Lachlan, and welcome...",
+      rating_count: 10,
+      rating_total: 2,
+      thumbnail: "https://yt3.ggpht.com/-SWZwLtHEz08/AAAAAAAAAAI/AAAAAAAAAAA/eQMhBKvqjQ0/s240-c-k-no-mo-rj-c0xffffff/photo.jpg",
+      title: "Lachlan",
+      yt_id: "UCh7EqOZt7EvO2osuKbIlpGg"
+    },
+    {...},
+    {...},
+    {...},
+    {...},
+    ...
+  ]
+}
+```
+/api/channels/:id
+```
+{
+  data: [
+    comment_count: "0",
+    date_updated: "2019-07-18T18:52:31.083Z",
+    description: "Experienced and seasoned player in...",
+    id: 1,
+    keywords: [
+      "mordhau", 
+      "alpha", 
+      "beta", 
+      "pre-release", 
+      ...
+    ],
+    rating_count: 3,
+    rating_total: 11,
+    subscriber_count: "25387",
+    thumbnail: "https://yt3.ggpht.com/-JHtfSa8v6vI/AAAAAAAAAAI/AAAAAAAAAAA/cLuFqmBYCLI/s88-c-k-no-mo-rj-c0xffffff/photo.jpg",
+    title: "Trix",
+    topics: [
+      0: "Gaming",
+      1: "Action game",
+      2: "Role-playing video game"
+    ],
+    total_videos: "58",
+    view_count: "3014061",
+    yt_id: "UCncxKtsdgI9ruYkmYbNWh6Q"
+  ]
+}
+```
+/api/reviews/:id
+```
+{
+  {
+    channel_id: 1,
+    date_created: "2019-07-16T16:11:57.305Z",
+    date_updated: "2019-07-16T16:11:57.305Z",
+    id: 1,
+    text: "USER 1 (admin) made a review for CHANNEL 1 (Trix)",
+    total_dislikes: 0,
+    total_likes: 1,
+    user_id: 1,
+    username: "admin"
+  },
+  {...},
+  {...},
+  {...}
+}
 ```
 
 ## Scripts
@@ -74,7 +146,7 @@ npm run migrate-production
 ```
 Run the migrate-production down
 ```
-npm run migrate -- 0
+npm run migrate-production -- 0
 ```
 
 ## Seeds
@@ -85,20 +157,22 @@ Add:
 ```
 // from the terminal
 psql -U <username> -d ytdb -f ./path-to-YTDB-Server/seeds/seed.tables.sql
+
 // from within the db
 \i ./path-to-YTDB-Server/seeds/seed.tables.sql
 ```
 ---
-Remove
+Remove:
 ```
 // from the terminal
 psql -U <username> -d ytdb -f ./path-to-YTDB-Server/seeds/trunc.tables.sql
+
 // from within the db
 \i ./path-to-YTDB-Server/seeds/trunc.tables.sql
 ```
-==Test User:==
-username: admin
-password: pass
+`Test User:`
++ username: admin
++ password: pass
 
 ## Database Setup
 
