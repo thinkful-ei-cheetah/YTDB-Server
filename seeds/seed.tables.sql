@@ -228,6 +228,6 @@ SELECT pg_catalog.setval(pg_get_serial_sequence('channel', 'id'), MAX(id)) FROM 
 SELECT pg_catalog.setval(pg_get_serial_sequence('keyword', 'id'), MAX(id)) FROM keyword;
 SELECT pg_catalog.setval(pg_get_serial_sequence('review', 'id'), MAX(id)) FROM review;
 SELECT pg_catalog.setval(pg_get_serial_sequence('topic', 'id'), MAX(id)) FROM topic;
--- SELECT pg_catalog.setval(pg_get_serial_sequence('user', 'id'), MAX(id)) FROM user;
+SELECT pg_catalog.setval(pg_get_serial_sequence('user', 'id'), MAX(id)) FROM "user";
 
 COMMIT;
