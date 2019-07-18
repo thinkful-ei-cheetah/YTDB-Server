@@ -6,7 +6,9 @@ const {
   clearTables,
   makeAuthHeader,
   createUser,
-  createChannel
+  createChannel,
+  populateTopicTable,
+  createUserRating
 } = require('./test-helpers');
 
 describe('/API/CHANNELS endpoint', () => {
@@ -29,12 +31,12 @@ describe('/API/CHANNELS endpoint', () => {
     rating_count: 0,
     date_updated: '2019-07-16T20:25:38.466Z',
     total_videos: '942',
-    subscriber_count: '1780907',
+    subscriber_count: null,
     view_count: '200132571',
     comment_count: '0'
   };
 
-  const topicId = '/m/04rlf';
+  const topicId = '/m/0bzvm2';
 
   before('set database connection and create user', async () => {
     db = getDB();
@@ -58,7 +60,7 @@ describe('/API/CHANNELS endpoint', () => {
 
   const header = makeAuthHeader(user1);
 
-  describe.only('/SEARCH/:SEARCH_TERM/:YTAPI', () => {
+  describe('/SEARCH/:SEARCH_TERM/:YTAPI', () => {
     it('GET should return 200', () => {
       return supertest(app)
         .get('/api/channels/search/fornite/true')
@@ -69,32 +71,52 @@ describe('/API/CHANNELS endpoint', () => {
     });
   });
 
-  describe.only('/SEARCH/:SEARCH_TERM/:YTAPI/TOPICID', () => {
+  describe('/:ID', async () => {
+    before('clear table and add test channel', async () => {
+      await clearTables(db);
+      await populateTopicTable(db);
+      return createChannel(db, channel);
+    });
+
+    it('/ID GET should return 200', () => {
+      return supertest(app)
+        .get(`/api/channels/UC_q5WZtFp36adwqhKpZzxwQ`)
+        .set({
+          Authorization: header
+        })
+        .expect(200);
+    });
+  });
+
+  describe('/:ID/USERRATING', async () => {
+    before('insert user rating', async () => {
+      await createUser(user, db);
+      return createUserRating(db, 1, 1, 4);
+    });
+
+    after('clear database of added channel', async () => {
+      await clearTables(db);
+    });
+
+    it('GET should return 200', () => {
+      return supertest(app)
+        .get(`/api/channels/UC_q5WZtFp36adwqhKpZzxwQ`)
+        .set({
+          Authorization: header
+        })
+        .expect(200);
+    });
+  });
+
+  describe('/SEARCH/:SEARCH_TERM/:YTAPI/TOPICID', () => {
+    before('clear table and add test channel', async () => {
+      await clearTables(db);
+      return populateTopicTable(db);
+    });
+
     it('TOPICID GET should return 200', () => {
       return supertest(app)
         .get(`/api/channels/search/fornite/true/${encodeURIComponent(topicId)}`)
-        .set({
-          Authorization: header
-        })
-        .expect(200);
-    });
-  });
-
-  describe.only('/:ID', () => {
-    it('GET should return 200', () => {
-      return supertest(app)
-        .get(`/api/channels/UCh7EqOZt7EvO2osuKbIlpGg`)
-        .set({
-          Authorization: header
-        })
-        .expect(200);
-    });
-  });
-
-  describe.only('/:ID/USERRATING', () => {
-    it('GET should return 200', () => {
-      return supertest(app)
-        .get(`/api/channels/UCh7EqOZt7EvO2osuKbIlpGg/3`)
         .set({
           Authorization: header
         })
